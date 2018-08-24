@@ -870,6 +870,64 @@ _operator__compare_digest_impl(PyObject *module, PyObject *a, PyObject *b)
 
     return PyBool_FromLong(rc);
 }
+/* Are there official versions of these macros? */
+#define Py_VOID(...) ((void*)(__VA_ARGS__))
+#define Py_NEWREF(ob)    (Py_INCREF(ob), Py_VOID(ob))
+#define Py_XNEWREF(ob)   Py_VOID((!(ob)? 0: Py_NEWREF(ob))
+#define Py_RETURN_NEW(o)  return Py_NEWREF(o)
+#define Py_XRETURN_NEW(o) return Py_XNEWREF(o)
+
+/* Py_True/Py_False macros
+
+With these, be sure that if True is more likely Py_TRUTH is used, or if 
+False is more likely Py_UNTRUE is used, to reduce branching
+*/
+#define _Py_TRUE_NEW      Py_NEWREF(Py_True)
+#define _Py_FALSE_NEW     Py_NEWREF(Py_False)
+
+#define Py_TRUTH(stmt) ((!(stmt))? Py_False: Py_True)
+#define Py_UNTRUE(stmt) ((!(stmt))? Py_True: Py_False)
+
+#define Py_WAS_TRUE(o) ((!(o))? _Py_FALSE_NEW: _Py_TRUE_NEW)
+#define Py_WAS_FALSE(o) ((!(o))? _Py_TRUE_NEW: _Py_FALSE_NEW)
+
+#define Py_RETURN_TRUTH(t) return Py_WAS_TRUE(t)
+#define Py_RETURN_UNTRUE(t) return Py_WAS_FALSE(t)
+
+PyDoc_STRVAR(log_and_doc, "log_and(a, b) -- Same as 'a and b'.");
+static PyObject *
+_operator_log_and(PyObject *module, PyObject *args) {
+    
+    PyObject *const *ab;
+    PyObject       *res;
+    
+    if(Py_SIZE(args) != 2)
+        return PyErr_Format(PyExc_TypeError, 
+                            "log_and requires exactly two arguments "
+                            "(got %zu)", Py_SIZE(args));
+    ab  = &PyTuple_GET_ITEM(args, 0);
+    res = PyObject_IsTrue(ab[0])? ab[1]: ab[0];
+    return Py_XNEWREF(res);
+}
+
+PyDoc_STRVAR(call_doc, "call(f, *arg, **kws) -- Same as f(*args, **kws).");
+static PyObject *
+_operator_call(PyObject *module, PyObject *args, PyObject *kws) 
+{
+
+    PyObject   **stack = NULL;
+    PyObject *callable = NULL;
+    
+    Py_ssize_t const n = Py_SIZE(args) - 1;
+    
+    if (n < 0)
+        return PyErr_Format(PyExc_TypeError, 
+                            "call requires at least one argument");
+    
+    stack    = &PyTuple_GET_ITEM(args, 0);
+    callable = *stack++;
+    return _PyObject_FastCallDict(callable, stack, n, kws);
+}
 
 /* operator methods **********************************************************/
 
