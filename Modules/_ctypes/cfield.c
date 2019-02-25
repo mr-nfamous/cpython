@@ -36,7 +36,7 @@ PyCField_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
  * field in *poffset, the alignment requirements for the current field in
  * *palign, and returns a field desriptor for this field.
  */
-/*
+/* 
  * bitfields extension:
  * bitsize != 0: this is a bit field.
  * pbitofs points to the current bit offset, this will be updated.
