@@ -60,8 +60,7 @@ PyCField_FromDesc(PyObject *desc, Py_ssize_t index,
 #define CONT_BITFIELD 2
 #define EXPAND_BITFIELD 3
 
-    self = (CFieldObject *)PyObject_CallObject((PyObject *)&PyCField_Type,
-                                               NULL);
+    self = (CFieldObject *)PyCField_Type.tp_alloc(&PyCField_Type, 0);
     if (self == NULL)
         return NULL;
     dict = PyType_stgdict(desc);
@@ -301,15 +300,15 @@ PyCField_repr(CFieldObject *self)
 
 PyTypeObject PyCField_Type = {
     PyVarObject_HEAD_INIT(NULL, 0)
-    "_ctypes.CField",                                   /* tp_name */
+    "_ctypes.CField",                           /* tp_name */
     sizeof(CFieldObject),                       /* tp_basicsize */
     0,                                          /* tp_itemsize */
-    PyCField_dealloc,                                   /* tp_dealloc */
+    PyCField_dealloc,                           /* tp_dealloc */
     0,                                          /* tp_print */
     0,                                          /* tp_getattr */
     0,                                          /* tp_setattr */
     0,                                          /* tp_reserved */
-    (reprfunc)PyCField_repr,                            /* tp_repr */
+    (reprfunc)PyCField_repr,                    /* tp_repr */
     0,                                          /* tp_as_number */
     0,                                          /* tp_as_sequence */
     0,                                          /* tp_as_mapping */
@@ -321,15 +320,15 @@ PyTypeObject PyCField_Type = {
     0,                                          /* tp_as_buffer */
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_GC, /* tp_flags */
     "Structure/Union member",                   /* tp_doc */
-    (traverseproc)PyCField_traverse,                    /* tp_traverse */
-    (inquiry)PyCField_clear,                            /* tp_clear */
+    (traverseproc)PyCField_traverse,            /* tp_traverse */
+    (inquiry)PyCField_clear,                    /* tp_clear */
     0,                                          /* tp_richcompare */
     0,                                          /* tp_weaklistoffset */
     0,                                          /* tp_iter */
     0,                                          /* tp_iternext */
     0,                                          /* tp_methods */
     0,                                          /* tp_members */
-    PyCField_getset,                                    /* tp_getset */
+    PyCField_getset,                            /* tp_getset */
     0,                                          /* tp_base */
     0,                                          /* tp_dict */
     (descrgetfunc)PyCField_get,                 /* tp_descr_get */
@@ -337,7 +336,7 @@ PyTypeObject PyCField_Type = {
     0,                                          /* tp_dictoffset */
     0,                                          /* tp_init */
     0,                                          /* tp_alloc */
-    PyCField_new,                               /* tp_new */
+    0,                                          /* tp_new */
     0,                                          /* tp_free */
 };
 
